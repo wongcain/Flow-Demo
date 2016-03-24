@@ -1,6 +1,7 @@
-package com.cainwong.flowdemo.dagger;
+package com.cainwong.flowdemo.core;
 
-import com.cainwong.flowdemo.views.ReviewsListView;
+import com.cainwong.flowdemo.reviewdetails.ReviewDetailsView;
+import com.cainwong.flowdemo.reviewlist.ReviewsListView;
 
 import javax.inject.Singleton;
 
@@ -14,5 +15,6 @@ import dagger.Component;
 public interface AppComponent {
 
     void inject(ReviewsListView v);
+    void inject(ReviewDetailsView v);
 
 }

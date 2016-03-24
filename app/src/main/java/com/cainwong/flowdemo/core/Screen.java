@@ -1,4 +1,4 @@
-package com.cainwong.flowdemo.screens;
+package com.cainwong.flowdemo.core;
 
 /**
  * Created by cwong on 3/18/16.

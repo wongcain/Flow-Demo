@@ -1,13 +1,14 @@
-package com.cainwong.flowdemo.presenters;
+package com.cainwong.flowdemo.reviewlist;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ViewGroup;
 
+import com.cainwong.flowdemo.core.Presenter;
 import com.cainwong.flowdemo.models.Review;
-import com.cainwong.flowdemo.mvp.Presenter;
+import com.cainwong.flowdemo.reviewdetails.ReviewDetailsScreen;
 import com.cainwong.flowdemo.rss.PitchforkRssClient;
-import com.cainwong.flowdemo.views.ReviewsListView;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import rx.functions.Action1;
  * Created by cwong on 3/22/16.
  */
 @Singleton
-public class ReviewsListPresenter extends Presenter<ReviewsListView> {
+public class ReviewsListPresenter extends Presenter<ReviewsListView, ReviewsListScreen> {
 
     private static final String TAG = ReviewsListPresenter.class.getSimpleName();
 
@@ -34,7 +35,7 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView> {
     private final Scheduler mainScheduler;
     private final Scheduler ioScheduler;
     private final List<Review> reviews;
-    private final ReviewsListAdapter adapter;
+    private ReviewsListAdapter adapter;
 
     @Inject
     public ReviewsListPresenter(PitchforkRssClient pitchforkRssClient,
@@ -44,13 +45,13 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView> {
         this.mainScheduler = mainScheduler;
         this.ioScheduler = ioScheduler;
         reviews = new ArrayList<>();
-        adapter = new ReviewsListAdapter(reviews);
 
     }
 
     @Override
     public void init(ReviewsListView view) {
         super.init(view);
+        adapter = new ReviewsListAdapter(view.getContext(), reviews);
         view.setAdapter(adapter);
         pitchforkRssClient.getAlbumReviews()
                 .subscribeOn(ioScheduler)
@@ -58,6 +59,7 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView> {
                 .subscribe(new Action1<List<Review>>() {
                     @Override
                     public void call(List<Review> list) {
+                        Log.d(TAG, "Successfully fetched " + list.size() + " reviews");
                         reviews.clear();
                         reviews.addAll(list);
                         adapter.notifyDataSetChanged();
@@ -73,9 +75,11 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView> {
 
     static class ReviewsListAdapter extends RecyclerView.Adapter<ReviewsListView.ReviewsListItemViewHolder> {
 
+        private final Context context;
         private final List<Review> reviews;
 
-        ReviewsListAdapter(List<Review> reviews) {
+        ReviewsListAdapter(Context context, List<Review> reviews) {
+            this.context = context;
             this.reviews = reviews;
         }
 
@@ -87,10 +91,16 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView> {
         @Override
         public void onBindViewHolder(ReviewsListView.ReviewsListItemViewHolder holder, int position) {
             if(position < reviews.size()) {
-                Review review = reviews.get(position);
+                final Review review = reviews.get(position);
                 holder.setAlbum(review.album);
                 holder.setArtist(review.artist);
                 holder.setDate(DateFormat.getDateInstance().format(new Date(review.postedTimestamp)));
+                holder.getClickObservable().subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        Flow.get(context).set(new ReviewDetailsScreen(review));
+                    }
+                });
             }
         }
 

@@ -1,6 +1,7 @@
-package com.cainwong.flowdemo.screens;
+package com.cainwong.flowdemo.reviewlist;
 
 import com.cainwong.flowdemo.R;
+import com.cainwong.flowdemo.core.Screen;
 
 /**
  * Created by cwong on 3/21/16.

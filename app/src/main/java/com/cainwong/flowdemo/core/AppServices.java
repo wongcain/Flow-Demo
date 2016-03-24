@@ -1,10 +1,4 @@
-package com.cainwong.flowdemo;
-
-import android.content.Context;
-
-import com.cainwong.flowdemo.dagger.AppComponent;
-import com.cainwong.flowdemo.dagger.AppModule;
-import com.cainwong.flowdemo.dagger.DaggerAppComponent;
+package com.cainwong.flowdemo.core;
 
 import flow.Services;
 import flow.ServicesFactory;
@@ -18,8 +12,8 @@ public class AppServices extends ServicesFactory {
 
     private final AppComponent appComponent;
 
-    AppServices(Context  context) {
-        appComponent = DaggerAppComponent.builder().appModule(new AppModule(context)).build();
+    public AppServices() {
+        appComponent = DaggerAppComponent.builder().appModule(new AppModule()).build();
     }
 
     @Override

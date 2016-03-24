@@ -1,19 +1,19 @@
-package com.cainwong.flowdemo.views;
+package com.cainwong.flowdemo.reviewlist;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cainwong.flowdemo.AppServices;
 import com.cainwong.flowdemo.R;
-import com.cainwong.flowdemo.dagger.AppComponent;
-import com.cainwong.flowdemo.presenters.ReviewsListPresenter;
+import com.cainwong.flowdemo.core.AppComponent;
+import com.cainwong.flowdemo.core.AppServices;
+import com.jakewharton.rxbinding.view.RxView;
 
 import javax.inject.Inject;
 
@@ -29,18 +29,9 @@ public class ReviewsListView extends RecyclerView {
     @Inject
     ReviewsListPresenter presenter;
 
-    public ReviewsListView(Context context) {
-        super(context);
-        ((AppComponent) Flow.getService(AppServices.APP_COMPONENT, context)).inject(this);
-    }
-
     public ReviewsListView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        ((AppComponent) Flow.getService(AppServices.APP_COMPONENT, context)).inject(this);
-    }
-
-    public ReviewsListView(Context context, @Nullable AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
+        this.setLayoutManager(new LinearLayoutManager(context));
         ((AppComponent) Flow.getService(AppServices.APP_COMPONENT, context)).inject(this);
     }
 
@@ -82,6 +73,10 @@ public class ReviewsListView extends RecyclerView {
 
         public void setDate(String date){
             dateView.setText(date);
+        }
+
+        public rx.Observable<Void> getClickObservable(){
+            return RxView.clicks(itemView);
         }
 
         public static ReviewsListItemViewHolder newInstance(ViewGroup parent){

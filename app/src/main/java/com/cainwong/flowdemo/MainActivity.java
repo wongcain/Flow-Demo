@@ -11,8 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cainwong.flowdemo.screens.ReviewsListScreen;
-import com.cainwong.flowdemo.screens.Screen;
+import com.cainwong.flowdemo.core.AppServices;
+import com.cainwong.flowdemo.core.GsonParceler;
+import com.cainwong.flowdemo.core.Screen;
+import com.cainwong.flowdemo.reviewlist.ReviewsListScreen;
+import com.google.gson.Gson;
 
 import java.util.Map;
 
@@ -39,10 +42,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override protected void attachBaseContext(Context baseContext) {
         baseContext = Flow.configure(baseContext, this)
-                .addServicesFactory(new AppServices(baseContext))
+                .addServicesFactory(new AppServices())
                 .defaultKey(new ReviewsListScreen())
                 .dispatcher(KeyDispatcher.configure(this, new Changer()).build())
-//                .keyParceler(new BasicKeyParceler()) //
+                .keyParceler(new GsonParceler(new Gson()))
                 .install();
         super.attachBaseContext(baseContext);
     }
@@ -73,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 view = showKeyAsText(context, key, null);
             }
             incomingState.restore(view);
-            setContentView(view);
+            mainContainer.removeAllViews();
+            mainContainer.addView(view);
             callback.onTraversalCompleted();
         }
 

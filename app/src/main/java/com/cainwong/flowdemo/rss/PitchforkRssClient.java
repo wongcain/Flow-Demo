@@ -3,8 +3,8 @@ package com.cainwong.flowdemo.rss;
 import android.net.Uri;
 
 import com.cainwong.flowdemo.models.Review;
-import com.cainwong.flowdemo.models.models.Item;
-import com.cainwong.flowdemo.models.models.RssRoot;
+import com.cainwong.flowdemo.rss.models.Item;
+import com.cainwong.flowdemo.rss.models.RssRoot;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

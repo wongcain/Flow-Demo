@@ -1,6 +1,4 @@
-package com.cainwong.flowdemo.dagger;
-
-import android.content.Context;
+package com.cainwong.flowdemo.core;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -18,18 +16,6 @@ import rx.schedulers.Schedulers;
 @Module
 public class AppModule {
 
-    private final Context appContext;
-
-    public AppModule(Context context) {
-        this.appContext = context.getApplicationContext();
-    }
-
-    @Provides
-    @Singleton
-    Context provideApplicationContext() {
-        return appContext;
-    }
-    // Required to use UserID and Password to log in to system.
     @Provides
     @Singleton
     OkHttpClient provideOkHttpClient() {
