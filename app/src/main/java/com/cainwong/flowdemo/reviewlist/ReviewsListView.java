@@ -75,7 +75,7 @@ public class ReviewsListView extends RecyclerView {
             dateView.setText(date);
         }
 
-        public rx.Observable<Void> getClickObservable(){
+        public rx.Observable<Void> getItemClicks(){
             return RxView.clicks(itemView);
         }
 

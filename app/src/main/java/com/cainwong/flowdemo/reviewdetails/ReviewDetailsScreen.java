@@ -9,14 +9,14 @@ import com.cainwong.flowdemo.models.Review;
  */
 public class ReviewDetailsScreen implements Screen {
 
-    private final Review review;
+    private final int reviewIndex;
 
-    public ReviewDetailsScreen(Review review) {
-        this.review = review;
+    public ReviewDetailsScreen(int reviewIndex) {
+        this.reviewIndex = reviewIndex;
     }
 
-    public Review getReview(){
-        return review;
+    public int getReviewIndex(){
+        return reviewIndex;
     }
 
     @Override

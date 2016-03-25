@@ -6,6 +6,7 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +31,19 @@ import flow.TraversalCallback;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
+    @Nullable
     @Bind(R.id.main_container)
     ViewGroup mainContainer;
+
+    @Nullable
+    @Bind(R.id.review_list_container)
+    ViewGroup reviewListContainer;
+
+    @Nullable
+    @Bind(R.id.review_detail_container)
+    ViewGroup reviewDetailContainer;
 
 
     @Override protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override protected void attachBaseContext(Context baseContext) {
+        Log.d(TAG, "attachBaseContext");
         baseContext = Flow.configure(baseContext, this)
                 .addServicesFactory(new AppServices())
                 .defaultKey(new ReviewsListScreen())
@@ -56,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    boolean isLandscape(){
+        return reviewDetailContainer != null;
+    }
+
     private final class Changer extends KeyChanger {
 
         @Override public void changeKey(@Nullable State outgoingState, @NonNull State incomingState,
@@ -65,28 +82,45 @@ public class MainActivity extends AppCompatActivity {
             Object key = incomingState.getKey();
             Context context = incomingContexts.get(key);
 
-            if (outgoingState != null) {
-                outgoingState.save(mainContainer.getChildAt(0));
+            ViewGroup detailContainer = isLandscape() ? reviewDetailContainer : mainContainer;
+            ViewGroup listContainer = isLandscape() ? reviewListContainer : mainContainer;
+
+            if (outgoingState != null && detailContainer.getChildCount()>0) {
+                outgoingState.save(detailContainer.getChildAt(0));
             }
 
             View view;
             if (key instanceof Screen) {
-                view = showLayout(context, ((Screen)key).getLayoutId());
+                view = inflateLayout(context, ((Screen)key).getLayoutId());
             } else {
-                view = showKeyAsText(context, key, null);
+                view = createTextView(context, key, null);
             }
             incomingState.restore(view);
-            mainContainer.removeAllViews();
-            mainContainer.addView(view);
+
+            if(!isLandscape() || !(key instanceof ReviewsListScreen)){
+                detailContainer.removeAllViews();
+                detailContainer.addView(view);
+            }
+
+            if(isLandscape()){
+                if(listContainer.getChildCount() == 0){
+                    if(key instanceof ReviewsListScreen){
+                        listContainer.addView(view);
+                    } else {
+                        listContainer.addView(inflateLayout(context, new ReviewsListScreen().getLayoutId()));
+                    }
+                }
+            }
+
             callback.onTraversalCompleted();
         }
 
-        private View showLayout(Context context, @LayoutRes int layout) {
+        private View inflateLayout(Context context, @LayoutRes int layout) {
             LayoutInflater inflater = LayoutInflater.from(context);
             return inflater.inflate(layout, null);
         }
 
-        private View showKeyAsText(Context context, Object key, @Nullable final Object nextScreenOnClick) {
+        private View createTextView(Context context, Object key, @Nullable final Object nextScreenOnClick) {
             TextView view = new TextView(context);
             view.setText(key.toString());
 

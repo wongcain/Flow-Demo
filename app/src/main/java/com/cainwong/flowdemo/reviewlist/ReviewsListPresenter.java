@@ -16,11 +16,9 @@ import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import flow.Flow;
-import rx.Scheduler;
 import rx.functions.Action1;
 
 /**
@@ -32,18 +30,12 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView, ReviewsList
     private static final String TAG = ReviewsListPresenter.class.getSimpleName();
 
     private final PitchforkRssClient pitchforkRssClient;
-    private final Scheduler mainScheduler;
-    private final Scheduler ioScheduler;
     private final List<Review> reviews;
     private ReviewsListAdapter adapter;
 
     @Inject
-    public ReviewsListPresenter(PitchforkRssClient pitchforkRssClient,
-                                @Named("mainThread") Scheduler mainScheduler,
-                                @Named("ioThread") Scheduler ioScheduler) {
+    public ReviewsListPresenter(PitchforkRssClient pitchforkRssClient) {
         this.pitchforkRssClient = pitchforkRssClient;
-        this.mainScheduler = mainScheduler;
-        this.ioScheduler = ioScheduler;
         reviews = new ArrayList<>();
 
     }
@@ -54,8 +46,6 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView, ReviewsList
         adapter = new ReviewsListAdapter(view.getContext(), reviews);
         view.setAdapter(adapter);
         pitchforkRssClient.getAlbumReviews()
-                .subscribeOn(ioScheduler)
-                .observeOn(mainScheduler)
                 .subscribe(new Action1<List<Review>>() {
                     @Override
                     public void call(List<Review> list) {
@@ -65,11 +55,6 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView, ReviewsList
                         adapter.notifyDataSetChanged();
                     }
 
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e(TAG, "Error fetching reviews: " + throwable.toString());
-                    }
                 });
     }
 
@@ -89,16 +74,16 @@ public class ReviewsListPresenter extends Presenter<ReviewsListView, ReviewsList
         }
 
         @Override
-        public void onBindViewHolder(ReviewsListView.ReviewsListItemViewHolder holder, int position) {
+        public void onBindViewHolder(ReviewsListView.ReviewsListItemViewHolder holder, final int position) {
             if(position < reviews.size()) {
-                final Review review = reviews.get(position);
+                Review review = reviews.get(position);
                 holder.setAlbum(review.album);
                 holder.setArtist(review.artist);
                 holder.setDate(DateFormat.getDateInstance().format(new Date(review.postedTimestamp)));
-                holder.getClickObservable().subscribe(new Action1<Void>() {
+                holder.getItemClicks().subscribe(new Action1<Void>() {
                     @Override
                     public void call(Void aVoid) {
-                        Flow.get(context).set(new ReviewDetailsScreen(review));
+                        Flow.get(context).set(new ReviewDetailsScreen(position));
                     }
                 });
             }
